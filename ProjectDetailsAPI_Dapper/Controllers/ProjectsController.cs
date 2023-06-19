@@ -70,7 +70,7 @@ namespace ProjectDetailsAPI_Dapper.Controllers
                 return NotFound("you are not able to Delete this project Id " + id + " May be already deleted OR please entered some data first and after that only you are able to delete this data!!!");
             }
             _logger.LogInformation("Project deleted successfully!!!");
-            return Ok("Project deleted successfully!!!");
+            return Ok("Deleted Successfully!!!");
         }
 
         [HttpPut("Update")]
@@ -78,19 +78,19 @@ namespace ProjectDetailsAPI_Dapper.Controllers
         public async Task<IActionResult> Update(Projects product)
         {
             var result = _unitOfWork.Projects.UpdateAsync(product);
-            if(result.IsCompleted == false)
+            if(result.Result != 1)
             {
                 _logger.LogWarning("Id" + product.Id + " is Not present in the database please first insert id then try to update that!!!");
                 return NotFound("Id" + product.Id+ " is Not present in the database please first insert id then try to update that!!!");
             }
 
-            return Ok("Update Successfully!!!");
+            return Ok("Updated Successfully!!!");
         }
 
 
         [HttpGet("id")]
         [ValidateModule]
-        [Authorize(Roles ="Admin")]
+        //[Authorize(Roles ="Admin")]
         public async Task<IActionResult> GetById(int id)
         {
             var data = await _unitOfWork.Projects.GetByIdAsync(id);
@@ -98,7 +98,6 @@ namespace ProjectDetailsAPI_Dapper.Controllers
             if (data == null || data.isDeleted == true)
             {
                 _logger.LogWarning($"Project with Id {id} not Found");
-                //_logger.LogError("this is an error log");
                 return NotFound("Id " + id + " Not found may be deleted Or not inserted yet,please try again");
             }
             _logger.LogInformation("Your request is disply on the screen please check!!!");

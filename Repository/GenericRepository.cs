@@ -17,11 +17,11 @@ using static Dapper.SqlMapper;
 
 namespace Repository
 {
-    public class GenericRepository <T> : IGenericRepository<T> where T : class
+    public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
-       
+
         private readonly IConfiguration _configuration;
-       private ProjectDetailsDbContext dbConnection;
+        private ProjectDetailsDbContext dbConnection;
         private IDbConnection dbConnection1;
 
         public GenericRepository(IDbConnection dbConnection1)
@@ -29,10 +29,6 @@ namespace Repository
             this.dbConnection1 = dbConnection1;
         }
 
-        public GenericRepository(ProjectDetailsDbContext dbConnection)
-        {
-            this.dbConnection = dbConnection;
-        }
         public async Task<int> AddAsync(T entity)
         {
             string tableName = typeof(T).Name;
@@ -60,7 +56,7 @@ namespace Repository
 
             string query = $"UPDATE {tableName} SET isActive = 0, isDeleted = 1 WHERE Id = @Id";
             return await dbConnection1.ExecuteAsync(query, parameters);
-        }       
+        }
 
         //public async Task<IEnumerable<T>> GetAllAsync()
         //{
@@ -107,7 +103,7 @@ namespace Repository
         }
 
         public async Task<int> UpdateAsync(T entity)
-        {            
+        {
             string tableName = typeof(T).Name;
             var properties = typeof(T).GetProperties().Where(p => p.Name != "Id").ToList();
 
@@ -115,7 +111,15 @@ namespace Repository
 
             string query = $"UPDATE {tableName} SET {updateColumns} WHERE Id = @Id";
 
-            return await dbConnection1.ExecuteAsync(query, entity);           
+            int rowsAffected = await dbConnection1.ExecuteAsync(query, entity);
+
+            //id is present or not Check if any rows were affected by the update
+            if (rowsAffected == 0)
+            {
+                return 0;
+            }
+
+            return rowsAffected;
         }
     }
 }

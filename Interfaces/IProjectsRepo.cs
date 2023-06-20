@@ -10,6 +10,6 @@ using System.Data;
 namespace Interfaces
 {
     public interface IProjectsRepo : IGenericRepository<Projects>
-    {
+    {       
     }
 }

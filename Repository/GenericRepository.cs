@@ -29,18 +29,39 @@ namespace Repository
             this.dbConnection1 = dbConnection1;
         }
 
+
         public async Task<int> AddAsync(T entity)
         {
+            // Set additional fields manually
+            var isActiveProperty = typeof(T).GetProperty("isActive");
+            var isDeletedProperty = typeof(T).GetProperty("isDeleted");
+            var createdDateProperty = typeof(T).GetProperty("CreatedDate");
+            var updatedDateProperty = typeof(T).GetProperty("UpdatedDate");
+            var createdByProperty = typeof(T).GetProperty("CreatedBy");
+            var updatedByProperty = typeof(T).GetProperty("UpdatedBy");
+
+            isActiveProperty?.SetValue(entity, true);
+            isDeletedProperty?.SetValue(entity, false);
+            createdDateProperty?.SetValue(entity, DateTime.Now);
+            updatedDateProperty?.SetValue(entity, DateTime.Now);
+            createdByProperty?.SetValue(entity, "pooja");
+            updatedByProperty?.SetValue(entity, "pooja");
+
+            // Insert the entity into the database
             string tableName = typeof(T).Name;
-            var properties = typeof(T).GetProperties().Where(p => p.Name != "Id").ToList();
+            var properties = typeof(T).GetProperties()
+                .Where(p => p.Name != "Id" && p.CanWrite && !string.IsNullOrEmpty(p.Name))
+                .ToList();
 
             string columnNames = string.Join(", ", properties.Select(p => p.Name));
             string parameterNames = string.Join(", ", properties.Select(p => "@" + p.Name));
-
             string query = $"INSERT INTO {tableName} ({columnNames}) VALUES ({parameterNames})";
 
+
             return await dbConnection1.ExecuteAsync(query, entity);
+
         }
+
 
         public async Task<int> DeleteAsync(int id)
         {
@@ -57,15 +78,6 @@ namespace Repository
             string query = $"UPDATE {tableName} SET isActive = 0, isDeleted = 1 WHERE Id = @Id";
             return await dbConnection1.ExecuteAsync(query, parameters);
         }
-
-        //public async Task<IEnumerable<T>> GetAllAsync()
-        //{
-        //    var query = "SELECT * FROM " + typeof(T).Name;
-        //    dbConnection1.Open();
-        //    var result = await dbConnection1.QueryAsync<T>(query);
-        //    dbConnection1.Close();
-        //    return result;
-        //}
         public async Task<IEnumerable<T>> GetAllAsync(string projectName, string orderByColumn, bool isDescending, int pageSize = 1000, int pageNumber = 1)
         {
             string tableName = typeof(T).Name;
@@ -104,22 +116,22 @@ namespace Repository
 
         public async Task<int> UpdateAsync(T entity)
         {
+            // Set the UpdatedDate 
+            var updatedDateProperty = typeof(T).GetProperty("UpdatedDate");
+            updatedDateProperty?.SetValue(entity, DateTime.Now);
+
+            // Update the entity in the database
             string tableName = typeof(T).Name;
-            var properties = typeof(T).GetProperties().Where(p => p.Name != "Id").ToList();
+            var properties = typeof(T).GetProperties()
+        .Where(p => p.Name != "Id" && p.CanWrite && !string.IsNullOrEmpty(p.Name) &&
+                    p.Name != "CreatedDate" && p.Name != "CreatedBy" &&
+                    p.Name != "UpdatedBy" && p.Name != "isActive" && p.Name != "isDeleted")
+        .ToList();
 
-            string updateColumns = string.Join(", ", properties.Select(p => $"{p.Name} = @{p.Name}"));
+            string columnValues = string.Join(", ", properties.Select(p => $"{p.Name} = @{p.Name}"));
+            string query = $"UPDATE {tableName} SET {columnValues} WHERE Id = @Id";
 
-            string query = $"UPDATE {tableName} SET {updateColumns} WHERE Id = @Id";
-
-            int rowsAffected = await dbConnection1.ExecuteAsync(query, entity);
-
-            //id is present or not Check if any rows were affected by the update
-            if (rowsAffected == 0)
-            {
-                return 0;
-            }
-
-            return rowsAffected;
+            return await dbConnection1.ExecuteAsync(query, entity);
         }
     }
 }

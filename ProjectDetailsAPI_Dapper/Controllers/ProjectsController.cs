@@ -24,20 +24,22 @@ namespace ProjectDetailsAPI_Dapper.Controllers
         private readonly ILogger<ProjectsController> _logger;
         private readonly IConfiguration _configuration;
         private readonly IMapper _mapper;
-       
+        private readonly IProjectsRepo _projectRepo;
 
-        public ProjectsController(IUnitOfWork unitOfWork, ILogger<ProjectsController> logger, IConfiguration configuration, IMapper mapper)
+
+        public ProjectsController(IUnitOfWork unitOfWork, ILogger<ProjectsController> logger, IConfiguration configuration, IMapper mapper, IProjectsRepo projectsRepo)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
             _configuration = configuration;
             _mapper = mapper;
+            _projectRepo = projectsRepo;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll(string projectName = null, string orderByColumn = "Id", bool isDescending = false, int pageSize = 1000, int pageNumber = 1)
         {
-            var data = await _unitOfWork.Projects.GetAllAsync(projectName,orderByColumn,isDescending,pageSize,pageNumber);
+            var data = await _unitOfWork.Projects.GetAllAsync(projectName, orderByColumn, isDescending, pageSize, pageNumber);
             var result = data.Where(x => x.isDeleted == false);
             if (result != null && result.Any())
             {
@@ -50,13 +52,36 @@ namespace ProjectDetailsAPI_Dapper.Controllers
                 return NotFound("This Project Name is not present in the database, please enter other name!!!!");
             }
         }
-        
+
+
         [HttpPost("Save")]
         [ValidateModule]
-        public async Task<IActionResult> Add(Projects product)
+        public async Task<IActionResult> Add(ProjectsDto product)
         {
-            _unitOfWork.Projects.AddAsync(product);
-            return CreatedAtAction("GetById", new { id = product.Id });
+            try
+            {
+                if (string.IsNullOrWhiteSpace(product.ProjectName))
+                {
+                    return BadRequest("Product name is required.");
+                }
+                var entity = _mapper.Map<Projects>(product);
+                var data =  await _unitOfWork.Projects.AddAsync(entity);
+
+                if(data == 1)
+                {
+                    var createdProductDto = _mapper.Map<ProjectsDto>(entity);
+                    var response = "Project Save successfully!!!";
+                    return CreatedAtAction("GetById", new { id = createdProductDto.Id }, response);
+                }
+                _logger.LogError("Not able to save project!!!");
+                return BadRequest("please entered valid data!!!");
+            }
+            catch (Exception ex)
+            {
+                // Handle any exceptions or errors that occurred during the product creation process
+                _logger.LogError(ex, "Error occurred while creating the product.");
+                return StatusCode(500, "An error occurred while creating the product.");
+            }
         }
 
         [HttpDelete("Delete")]
@@ -75,15 +100,16 @@ namespace ProjectDetailsAPI_Dapper.Controllers
 
         [HttpPut("Update")]
         [ValidateModule]
-        public async Task<IActionResult> Update(Projects product)
+        public async Task<IActionResult> Update(ProjectsDto product)
         {
-            var result = _unitOfWork.Projects.UpdateAsync(product);
-            if(result.Result != 1)
+            var entity = _mapper.Map<Projects>(product);
+            var result = _unitOfWork.Projects.UpdateAsync(entity);
+            if (result.Result != 1)
             {
                 _logger.LogWarning("Id" + product.Id + " is Not present in the database please first insert id then try to update that!!!");
-                return NotFound("Id" + product.Id+ " is Not present in the database please first insert id then try to update that!!!");
+                return NotFound("Id" + product.Id + " is Not present in the database please first insert id then try to update that!!!");
             }
-
+            _logger.LogInformation("Id " + product.Id + " updated successfully!!!");
             return Ok("Updated Successfully!!!");
         }
 

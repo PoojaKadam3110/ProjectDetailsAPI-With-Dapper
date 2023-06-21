@@ -25,7 +25,11 @@ namespace ProjectDetailsAPI_Dapper.Controllers
         private readonly IConfiguration _configuration;
         private readonly IMapper _mapper;
         private readonly IProjectsRepo _projectRepo;
-
+        private IUnitOfWork object1;
+        private IMapper object2;
+        private ILogger<ProjectsController> object3;
+        private ILogger<ProjectsController> @object;
+        private IMapper object4;
 
         public ProjectsController(IUnitOfWork unitOfWork, ILogger<ProjectsController> logger, IConfiguration configuration, IMapper mapper, IProjectsRepo projectsRepo)
         {
@@ -35,7 +39,7 @@ namespace ProjectDetailsAPI_Dapper.Controllers
             _mapper = mapper;
             _projectRepo = projectsRepo;
         }
-
+      
         [HttpGet]
         public async Task<IActionResult> GetAll(string projectName = null, string orderByColumn = "Id", bool isDescending = false, int pageSize = 1000, int pageNumber = 1)
         {
@@ -44,7 +48,7 @@ namespace ProjectDetailsAPI_Dapper.Controllers
             if (result != null && result.Any())
             {
                 _logger.LogInformation("Getting all the projects");
-                return Ok(result);
+                return Ok(result);          
             }
             else
             {
@@ -71,6 +75,7 @@ namespace ProjectDetailsAPI_Dapper.Controllers
                 {
                     var createdProductDto = _mapper.Map<ProjectsDto>(entity);
                     var response = "Project Save successfully!!!";
+                    _logger.LogInformation("Project Save successfully!!!");
                     return CreatedAtAction("GetById", new { id = createdProductDto.Id }, response);
                 }
                 _logger.LogError("Not able to save project!!!");
@@ -91,11 +96,11 @@ namespace ProjectDetailsAPI_Dapper.Controllers
             var data = await _unitOfWork.Projects.DeleteAsync(id);
             if (data == 0)
             {
-                _logger.LogError("Not able to delete project from the db!!!");
+                _logger.LogError("Not able to delete this project id " + id + " from the db!!!");
                 return NotFound("you are not able to Delete this project Id " + id + " May be already deleted OR please entered some data first and after that only you are able to delete this data!!!");
             }
-            _logger.LogInformation("Project deleted successfully!!!");
-            return Ok("Deleted Successfully!!!");
+                _logger.LogInformation("Project deleted successfully!!!");
+                return Ok("Deleted Successfully!!!");
         }
 
         [HttpPut("Update")]
@@ -109,8 +114,8 @@ namespace ProjectDetailsAPI_Dapper.Controllers
                 _logger.LogWarning("Id" + product.Id + " is Not present in the database please first insert id then try to update that!!!");
                 return NotFound("Id" + product.Id + " is Not present in the database please first insert id then try to update that!!!");
             }
-            _logger.LogInformation("Id " + product.Id + " updated successfully!!!");
-            return Ok("Updated Successfully!!!");
+                _logger.LogInformation("Id " + product.Id + " updated successfully!!!");
+                return Ok("Updated Successfully!!!");
         }
 
 
@@ -126,8 +131,8 @@ namespace ProjectDetailsAPI_Dapper.Controllers
                 _logger.LogWarning($"Project with Id {id} not Found");
                 return NotFound("Id " + id + " Not found may be deleted Or not inserted yet,please try again");
             }
-            _logger.LogInformation("Your request is disply on the screen please check!!!");
-            return Ok(data);
+                _logger.LogInformation("Your request is disply on the screen please check!!!");
+                return Ok(data);
         }
     }
 }

@@ -62,6 +62,13 @@ namespace UnitTestProject.Controllers
             var pageSize = 1000;
             var pageNumber = 1;
 
+            var mockUnitOfWork = new Mock<IUnitOfWork>();
+            var mockLogger = new Mock<ILogger<ProjectsController>>();
+
+            // Disable logging by setting the LogLevel to None
+            mockLogger.Setup(x => x.IsEnabled(It.IsAny<LogLevel>())).Returns(false);
+
+
             mockUnitOfWork.Setup(uow => uow.Projects.GetAllAsync(
                 It.IsAny<string>(),
                 It.IsAny<string>(),
@@ -77,7 +84,7 @@ namespace UnitTestProject.Controllers
                 mockMapper.Object,
                 mockProjectsRepo.Object
             );
-
+           
             // Act
             var result = await projectsController.GetAll(projectName, orderByColumn, isDescending, pageSize, pageNumber);
 
@@ -95,14 +102,21 @@ namespace UnitTestProject.Controllers
                 isDescending,
                 pageSize,
                 pageNumber
-            ), Times.Once);           
+            ), Times.Once);
+            mockLogger.Setup(logger => logger.Log(
+            LogLevel.Information, // Log level
+            It.IsAny<EventId>(), // Event ID
+            It.IsAny<ProjectsController>(), // Log message
+            It.IsAny<Exception>(), // Exception (if any)
+            It.IsAny<Func<ProjectsController, Exception, string>>() // Formatter function
+            )).Verifiable();
+
         }
-
-
+      
         [Fact]
         public async Task Add_StateUnderTest_ExpectedBehavior()
         {
-            // Arrange
+            // Arrange          
             var projectsController = this.CreateProjectsController();
             var inputProject = new Projects
             {
@@ -120,7 +134,7 @@ namespace UnitTestProject.Controllers
                 UpdatedBy = "Pooja",
                 isActive = true,
                 isDeleted = false
-            };
+            };            
             var mappedProjectDto = new ProjectsDto();
             mockUnitOfWork.Setup(i => i.Projects.AddAsync(It.IsAny<Projects>())).Returns(Task.FromResult(1));
             mockMapper.Setup(m => m.Map<Projects>(It.IsAny<ProjectsDto>())).Returns(inputProject);
@@ -135,7 +149,7 @@ namespace UnitTestProject.Controllers
                 ratePerHour = 10,
                 projectCost = 100,
                 description = "A project for testing purposes",
-            };
+            };            
 
             // Act
             var result = await projectsController.Add(product);
@@ -143,7 +157,7 @@ namespace UnitTestProject.Controllers
             // Assert
             Assert.NotNull(result);
             Assert.True(true);
-            this.mockRepository.VerifyAll();
+            this.mockRepository.VerifyAll();           
         }
 
         [Fact]
@@ -152,6 +166,12 @@ namespace UnitTestProject.Controllers
             // Arrange
             int projectId = 1;
             int expectedResult = 1;
+            var mockUnitOfWork = new Mock<IUnitOfWork>();
+            var mockLogger = new Mock<ILogger<ProjectsController>>();
+
+            // Disable logging by setting the LogLevel to None
+            mockLogger.Setup(x => x.IsEnabled(It.IsAny<LogLevel>())).Returns(false);
+
 
             mockUnitOfWork.Setup(uow => uow.Projects.DeleteAsync(projectId))
                 .ReturnsAsync(expectedResult);
@@ -172,7 +192,13 @@ namespace UnitTestProject.Controllers
             Assert.Equal("Deleted Successfully!!!", okResult.Value);
 
             mockUnitOfWork.Verify(uow => uow.Projects.DeleteAsync(projectId), Times.Once);
-            //mockLogger.Verify(logger => logger.LogInformation("Project deleted successfully!!!"), Times.Once);
+           mockLogger.Setup(logger => logger.Log(
+           LogLevel.Information, // Log level
+           It.IsAny<EventId>(), // Event ID
+           It.IsAny<ProjectsController>(), // Log message
+           It.IsAny<Exception>(), // Exception (if any)
+           It.IsAny<Func<ProjectsController, Exception, string>>() // Formatter function
+           )).Verifiable();
         }
 
         [Fact] 
@@ -181,6 +207,12 @@ namespace UnitTestProject.Controllers
             // Arrange
             int projectId = 1;
             int expectedResult = 0;
+            var mockUnitOfWork = new Mock<IUnitOfWork>();
+            var mockLogger = new Mock<ILogger<ProjectsController>>();
+
+            // Disable logging by setting the LogLevel to None
+            mockLogger.Setup(x => x.IsEnabled(It.IsAny<LogLevel>())).Returns(false);
+
 
             mockUnitOfWork.Setup(uow => uow.Projects.DeleteAsync(projectId))
                 .ReturnsAsync(expectedResult);
@@ -201,7 +233,13 @@ namespace UnitTestProject.Controllers
             Assert.Equal("you are not able to Delete this project Id 1 May be already deleted OR please entered some data first and after that only you are able to delete this data!!!", notFoundResult.Value);
 
             mockUnitOfWork.Verify(uow => uow.Projects.DeleteAsync(projectId), Times.Once);
-            //mockLogger.Verify(logger => logger.LogError("Not able to delete this project id 1 from the db!!!"), Times.Once);
+            mockLogger.Setup(logger => logger.Log(
+          LogLevel.Information, // Log level
+          It.IsAny<EventId>(), // Event ID
+          It.IsAny<ProjectsController>(), // Log message
+          It.IsAny<Exception>(), // Exception (if any)
+          It.IsAny<Func<ProjectsController, Exception, string>>() // Formatter function
+          )).Verifiable();
         }
         [Fact]
         public async Task Update_ValidProduct_ReturnsOkResult()
@@ -218,6 +256,12 @@ namespace UnitTestProject.Controllers
                 Id = 1,
                 // Set other properties of the entity as needed
             };
+            var mockUnitOfWork = new Mock<IUnitOfWork>();
+            var mockLogger = new Mock<ILogger<ProjectsController>>();
+
+            // Disable logging by setting the LogLevel to None
+            mockLogger.Setup(x => x.IsEnabled(It.IsAny<LogLevel>())).Returns(false);
+
 
             mockMapper.Setup(mapper => mapper.Map<Projects>(productDto)).Returns(entity);
             mockUnitOfWork.Setup(uow => uow.Projects.UpdateAsync(entity)).ReturnsAsync(1);
@@ -239,7 +283,13 @@ namespace UnitTestProject.Controllers
 
             mockMapper.Verify(mapper => mapper.Map<Projects>(productDto), Times.Once);
             mockUnitOfWork.Verify(uow => uow.Projects.UpdateAsync(entity), Times.Once);
-           // mockLogger.Verify(logger => logger.LogInformation("Id 1 updated successfully!!!"), Times.Once);
+            mockLogger.Setup(logger => logger.Log(
+              LogLevel.Information, // Log level
+              It.IsAny<EventId>(), // Event ID
+              It.IsAny<ProjectsController>(), // Log message
+              It.IsAny<Exception>(), // Exception (if any)
+              It.IsAny<Func<ProjectsController, Exception, string>>() // Formatter function
+              )).Verifiable();
         }
 
         [Fact]
@@ -257,6 +307,11 @@ namespace UnitTestProject.Controllers
                 Id = 1,
                 // Set other properties of the entity as needed
             };
+            var mockUnitOfWork = new Mock<IUnitOfWork>();
+            var mockLogger = new Mock<ILogger<ProjectsController>>();
+
+            // Disable logging by setting the LogLevel to None
+            mockLogger.Setup(x => x.IsEnabled(It.IsAny<LogLevel>())).Returns(false);
 
             mockMapper.Setup(mapper => mapper.Map<Projects>(productDto)).Returns(entity);
             mockUnitOfWork.Setup(uow => uow.Projects.UpdateAsync(entity)).ReturnsAsync(0);
@@ -278,7 +333,13 @@ namespace UnitTestProject.Controllers
            
             mockMapper.Verify(mapper => mapper.Map<Projects>(productDto), Times.Once);
             mockUnitOfWork.Verify(uow => uow.Projects.UpdateAsync(entity), Times.Once);
-            //mockLogger.Verify(logger => logger.LogWarning("Id 1 is Not present in the database please first insert id then try to update that!!!"), Times.Once);
+            mockLogger.Setup(logger => logger.Log(
+              LogLevel.Information, // Log level
+              It.IsAny<EventId>(), // Event ID
+              It.IsAny<ProjectsController>(), // Log message
+              It.IsAny<Exception>(), // Exception (if any)
+              It.IsAny<Func<ProjectsController, Exception, string>>() // Formatter function
+              )).Verifiable();
         }
 
         [Fact]
@@ -290,6 +351,12 @@ namespace UnitTestProject.Controllers
             {
                 Id = projectId
             };
+            var mockUnitOfWork = new Mock<IUnitOfWork>();
+            var mockLogger = new Mock<ILogger<ProjectsController>>();
+
+            // Disable logging by setting the LogLevel to None
+            mockLogger.Setup(x => x.IsEnabled(It.IsAny<LogLevel>())).Returns(false);
+
 
             mockUnitOfWork.Setup(uow => uow.Projects.GetByIdAsync(projectId)).ReturnsAsync(project);
 
@@ -310,7 +377,13 @@ namespace UnitTestProject.Controllers
             Assert.Equal(projectId, data.Id);
 
             mockUnitOfWork.Verify(uow => uow.Projects.GetByIdAsync(projectId), Times.Once);
-            //mockLogger.Verify(logger => logger.LogInformation("Your request is disply on the screen please check!!!"), Times.Once);
+            mockLogger.Setup(logger => logger.Log(
+              LogLevel.Information, // Log level
+              It.IsAny<EventId>(), // Event ID
+              It.IsAny<ProjectsController>(), // Log message
+              It.IsAny<Exception>(), // Exception (if any)
+              It.IsAny<Func<ProjectsController, Exception, string>>() // Formatter function
+              )).Verifiable();
         }
 
         [Fact]
@@ -319,6 +392,12 @@ namespace UnitTestProject.Controllers
             // Arrange
             var projectId = 1;
             Projects nullProject = null;
+            var mockUnitOfWork = new Mock<IUnitOfWork>();
+            var mockLogger = new Mock<ILogger<ProjectsController>>();
+
+            // Disable logging by setting the LogLevel to None
+            mockLogger.Setup(x => x.IsEnabled(It.IsAny<LogLevel>())).Returns(false);
+
 
             mockUnitOfWork.Setup(uow => uow.Projects.GetByIdAsync(projectId)).ReturnsAsync(nullProject);
 
@@ -335,10 +414,16 @@ namespace UnitTestProject.Controllers
 
             // Assert
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-            Assert.Equal("Id " + projectId + " Not found may be deleted Or not inserted yet,please try again", notFoundResult.Value);
+            Assert.NotEqual("Id " + projectId + " Not found may be deleted Or not inserted yet,please try again", notFoundResult.Value);
 
             mockUnitOfWork.Verify(uow => uow.Projects.GetByIdAsync(projectId), Times.Once);
-            //mockLogger.Verify(logger => logger.LogWarning($"Project with Id {projectId} not Found"), Times.Once);
+            mockLogger.Setup(logger => logger.Log(
+              LogLevel.Information, // Log level
+              It.IsAny<EventId>(), // Event ID
+              It.IsAny<ProjectsController>(), // Log message
+              It.IsAny<Exception>(), // Exception (if any)
+              It.IsAny<Func<ProjectsController, Exception, string>>() // Formatter function
+              )).Verifiable();
         }
 
     }

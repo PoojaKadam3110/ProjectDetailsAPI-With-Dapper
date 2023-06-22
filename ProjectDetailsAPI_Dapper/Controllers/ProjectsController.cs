@@ -19,17 +19,12 @@ namespace ProjectDetailsAPI_Dapper.Controllers
     [Route("api/[controller]")]
     [ApiController]
     public class ProjectsController : ControllerBase
-    {
+    {       
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<ProjectsController> _logger;
         private readonly IConfiguration _configuration;
         private readonly IMapper _mapper;
         private readonly IProjectsRepo _projectRepo;
-        private IUnitOfWork object1;
-        private IMapper object2;
-        private ILogger<ProjectsController> object3;
-        private ILogger<ProjectsController> @object;
-        private IMapper object4;
 
         public ProjectsController(IUnitOfWork unitOfWork, ILogger<ProjectsController> logger, IConfiguration configuration, IMapper mapper, IProjectsRepo projectsRepo)
         {
@@ -66,7 +61,7 @@ namespace ProjectDetailsAPI_Dapper.Controllers
             {
                 if (string.IsNullOrWhiteSpace(product.ProjectName))
                 {
-                    return BadRequest("Product name is required.");
+                    return BadRequest("Project name is required.");
                 }
                 var entity = _mapper.Map<Projects>(product);
                 var data =  await _unitOfWork.Projects.AddAsync(entity);
@@ -75,16 +70,12 @@ namespace ProjectDetailsAPI_Dapper.Controllers
                 {
                     var createdProductDto = _mapper.Map<ProjectsDto>(entity);
                     var response = "Project Save successfully!!!";
-                    _logger.LogInformation("Project Save successfully!!!");
                     return CreatedAtAction("GetById", new { id = createdProductDto.Id }, response);
                 }
-                _logger.LogError("Not able to save project!!!");
                 return BadRequest("please entered valid data!!!");
             }
             catch (Exception ex)
             {
-                // Handle any exceptions or errors that occurred during the product creation process
-                _logger.LogError(ex, "Error occurred while creating the product.");
                 return StatusCode(500, "An error occurred while creating the product.");
             }
         }
@@ -111,17 +102,17 @@ namespace ProjectDetailsAPI_Dapper.Controllers
             var result = _unitOfWork.Projects.UpdateAsync(entity);
             if (result.Result != 1)
             {
-                _logger.LogWarning("Id" + product.Id + " is Not present in the database please first insert id then try to update that!!!");
+                _logger.LogWarning("Id " + product.Id + " is Not present in the database please first insert id then try to update that!!!");
                 return NotFound("Id" + product.Id + " is Not present in the database please first insert id then try to update that!!!");
             }
-                _logger.LogInformation("Id " + product.Id + " updated successfully!!!");
+               _logger.LogInformation("Id " + product.Id + " updated successfully!!!");
                 return Ok("Updated Successfully!!!");
         }
 
 
         [HttpGet("id")]
         [ValidateModule]
-        //[Authorize(Roles ="Admin")]
+        [Authorize(Roles ="Admin")]
         public async Task<IActionResult> GetById(int id)
         {
             var data = await _unitOfWork.Projects.GetByIdAsync(id);
@@ -129,10 +120,11 @@ namespace ProjectDetailsAPI_Dapper.Controllers
             if (data == null || data.isDeleted == true)
             {
                 _logger.LogWarning($"Project with Id {id} not Found");
-                return NotFound("Id " + id + " Not found may be deleted Or not inserted yet,please try again");
+                return NotFound("Id " + id + " Not found may be deleted or not inserted yet, please try again");
             }
-                _logger.LogInformation("Your request is disply on the screen please check!!!");
-                return Ok(data);
+
+            _logger.LogInformation("Your request is displayed on the screen, please check!!!");
+            return Ok(data);
         }
     }
 }

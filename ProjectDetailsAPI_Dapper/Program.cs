@@ -10,7 +10,19 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Text;
 
+// for cors
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
+
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+                      policy =>
+                      {
+                          policy.WithOrigins("http://localhost:3000").AllowAnyHeader().WithMethods("POST", "PUT", "DELETE", "GET");
+                      });
+});
 
 // Add services to the container.
 
@@ -109,7 +121,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 
-
 //End of Authentication
 
 var app = builder.Build();
@@ -131,6 +142,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseCors(MyAllowSpecificOrigins);
 
 app.MapControllers();
 

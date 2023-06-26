@@ -72,9 +72,7 @@ builder.Services.AddSwaggerGen(options =>
 // For DbContext()
 builder.Services.AddDbContext<ProjectDetailsDbContext>(options =>
  options.UseSqlServer(builder.Configuration.GetConnectionString("ProjectDetailsConnectionStrings")));
-string connectionString = "Server=ZCONL-140\\SQL2016EXPADV;DataBase=TSProjectDetailsZohoDapper;User=sa;Password=zcon@123;Trusted_Connection=true; TrustServerCertificate=true; Integrated Security=true;";
 
-builder.Services.AddScoped<IDbConnection>(sp => new SqlConnection(connectionString));
 // For DbContext()
 builder.Services.AddDbContext<ProjectDetailsAuthDbContext>(options =>
  options.UseSqlServer(builder.Configuration.GetConnectionString("ProjectsAuthConnectionStrings")));

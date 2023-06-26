@@ -9,6 +9,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Serilog;
 using Domain_Data.Mappings;
+using System.Data;
+using System.Data.SqlClient;
 
 namespace Infrastructure
 {
@@ -21,6 +23,10 @@ namespace Infrastructure
             services.AddScoped<ITokenRepository, TokenRepository>();
             services.AddLogging();
             services.AddAutoMapper(typeof(AutoMapperProfiles));
+
+            string connectionString = "Server=ZCONL-140\\SQL2016EXPADV;DataBase=TSProjectDetailsZohoDapper;User=sa;Password=zcon@123;Trusted_Connection=true; TrustServerCertificate=true; Integrated Security=true;";
+
+            services.AddScoped<IDbConnection>(sp => new SqlConnection(connectionString));
 
             Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Debug()

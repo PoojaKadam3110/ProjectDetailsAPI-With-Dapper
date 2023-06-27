@@ -1,4 +1,3 @@
-using Application.ErrorHandling;
 using Data;
 using Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -10,7 +9,6 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Data;
 using System.Data.SqlClient;
-using System.Diagnostics;
 using System.Net;
 using System.Text;
 
@@ -39,6 +37,8 @@ builder.Services.AddSwaggerGen();
 //For environment
 Environment.SetEnvironmentVariable("ASPNETCORE_APIURL", builder.Configuration.GetSection("Urls").GetSection("APIURL").Value);
 var env = Environment.GetEnvironmentVariable("ASPNETCORE_APIURL");
+
+
 
 //For Autorization
 builder.Services.AddSwaggerGen(options =>
@@ -138,10 +138,33 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+else
+{
+    app.UseExceptionHandler(options =>
+    {
+        options.Run(
+            async context =>
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                var ex = context.Features.Get<IExceptionHandlerFeature>();
+                if (ex != null)
+                {
+                    await context.Response.WriteAsync(ex.Error.Message);
+                }
+            }
+            );
+    }
+    );
+}
 
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+//app.UseEndpoints(endpoints =>
+//{
+//    endpoints.MapControllers();
+//});
 
 app.UseCors(MyAllowSpecificOrigins);
 

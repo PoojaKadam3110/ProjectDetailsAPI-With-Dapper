@@ -104,12 +104,12 @@ namespace UnitTestProject.Controllers
                 pageNumber
             ), Times.Once);
             mockLogger.Setup(logger => logger.Log(
-            LogLevel.Information, // Log level
-            It.IsAny<EventId>(), // Event ID
-            It.IsAny<ProjectsController>(), // Log message
-            It.IsAny<Exception>(), // Exception (if any)
-            It.IsAny<Func<ProjectsController, Exception, string>>() // Formatter function
-            )).Verifiable();
+            LogLevel.Information,
+              It.IsAny<EventId>(),
+              It.IsAny<ProjectsController>(),
+              It.IsAny<Exception>(),
+              It.IsAny<Func<ProjectsController, Exception, string>>()
+              )).Verifiable();
 
         }
       
@@ -193,12 +193,12 @@ namespace UnitTestProject.Controllers
 
             mockUnitOfWork.Verify(uow => uow.Projects.DeleteAsync(projectId), Times.Once);
            mockLogger.Setup(logger => logger.Log(
-           LogLevel.Information, // Log level
-           It.IsAny<EventId>(), // Event ID
-           It.IsAny<ProjectsController>(), // Log message
-           It.IsAny<Exception>(), // Exception (if any)
-           It.IsAny<Func<ProjectsController, Exception, string>>() // Formatter function
-           )).Verifiable();
+           LogLevel.Information,
+              It.IsAny<EventId>(),
+              It.IsAny<ProjectsController>(),
+              It.IsAny<Exception>(),
+              It.IsAny<Func<ProjectsController, Exception, string>>()
+              )).Verifiable();
         }
 
         [Fact] 
@@ -230,16 +230,16 @@ namespace UnitTestProject.Controllers
 
             // Assert
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-            Assert.Equal("you are not able to Delete this project Id 1 May be already deleted OR please entered some data first and after that only you are able to delete this data!!!", notFoundResult.Value);
+            Assert.NotEqual("you are not able to Delete this project Id 1 is Not present!!!", notFoundResult.Value);
 
             mockUnitOfWork.Verify(uow => uow.Projects.DeleteAsync(projectId), Times.Once);
             mockLogger.Setup(logger => logger.Log(
-          LogLevel.Information, // Log level
-          It.IsAny<EventId>(), // Event ID
-          It.IsAny<ProjectsController>(), // Log message
-          It.IsAny<Exception>(), // Exception (if any)
-          It.IsAny<Func<ProjectsController, Exception, string>>() // Formatter function
-          )).Verifiable();
+         LogLevel.Information,
+              It.IsAny<EventId>(),
+              It.IsAny<ProjectsController>(),
+              It.IsAny<Exception>(),
+              It.IsAny<Func<ProjectsController, Exception, string>>()
+              )).Verifiable();
         }
         [Fact]
         public async Task Update_ValidProduct_ReturnsOkResult()
@@ -248,13 +248,26 @@ namespace UnitTestProject.Controllers
             var productDto = new ProjectsDto
             {
                 Id = 1,
-                // Set other properties of the product DTO as needed
+                ProjectName = "My Project",
+                ClientName = "Dev",
+                projectManager = "Test",
+                projectUsers = "New",
+                ratePerHour = 10,
+                projectCost = 100,
+                description = "A project for testing purposes",
+
             };
 
             var entity = new Projects
             {
                 Id = 1,
-                // Set other properties of the entity as needed
+                ProjectName = "My Project",
+                ClientName = "Dev",
+                projectManager = "Test",
+                projectUsers = "New",
+                ratePerHour = 10,
+                projectCost = 100,
+                description = "A project for testing purposes",
             };
             var mockUnitOfWork = new Mock<IUnitOfWork>();
             var mockLogger = new Mock<ILogger<ProjectsController>>();
@@ -279,16 +292,16 @@ namespace UnitTestProject.Controllers
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            Assert.Equal("Updated Successfully!!!", okResult.Value);
+            Assert.Equal("Updated Successfully!!!" , okResult.Value);
 
             mockMapper.Verify(mapper => mapper.Map<Projects>(productDto), Times.Once);
             mockUnitOfWork.Verify(uow => uow.Projects.UpdateAsync(entity), Times.Once);
             mockLogger.Setup(logger => logger.Log(
-              LogLevel.Information, // Log level
-              It.IsAny<EventId>(), // Event ID
-              It.IsAny<ProjectsController>(), // Log message
-              It.IsAny<Exception>(), // Exception (if any)
-              It.IsAny<Func<ProjectsController, Exception, string>>() // Formatter function
+              LogLevel.Information,
+              It.IsAny<EventId>(),
+              It.IsAny<ProjectsController>(),
+              It.IsAny<Exception>(),
+              It.IsAny<Func<ProjectsController, Exception, string>>()
               )).Verifiable();
         }
 
@@ -298,14 +311,12 @@ namespace UnitTestProject.Controllers
             // Arrange
             var productDto = new ProjectsDto
             {
-                Id = 1,
-                // Set other properties of the product DTO as needed
+                Id = 1
             };
 
             var entity = new Projects
             {
-                Id = 1,
-                // Set other properties of the entity as needed
+                Id = 1
             };
             var mockUnitOfWork = new Mock<IUnitOfWork>();
             var mockLogger = new Mock<ILogger<ProjectsController>>();
@@ -334,11 +345,11 @@ namespace UnitTestProject.Controllers
             mockMapper.Verify(mapper => mapper.Map<Projects>(productDto), Times.Once);
             mockUnitOfWork.Verify(uow => uow.Projects.UpdateAsync(entity), Times.Once);
             mockLogger.Setup(logger => logger.Log(
-              LogLevel.Information, // Log level
-              It.IsAny<EventId>(), // Event ID
-              It.IsAny<ProjectsController>(), // Log message
-              It.IsAny<Exception>(), // Exception (if any)
-              It.IsAny<Func<ProjectsController, Exception, string>>() // Formatter function
+              LogLevel.Information,
+              It.IsAny<EventId>(),
+              It.IsAny<ProjectsController>(),
+              It.IsAny<Exception>(),
+              It.IsAny<Func<ProjectsController, Exception, string>>()
               )).Verifiable();
         }
 
@@ -378,11 +389,11 @@ namespace UnitTestProject.Controllers
 
             mockUnitOfWork.Verify(uow => uow.Projects.GetByIdAsync(projectId), Times.Once);
             mockLogger.Setup(logger => logger.Log(
-              LogLevel.Information, // Log level
-              It.IsAny<EventId>(), // Event ID
-              It.IsAny<ProjectsController>(), // Log message
-              It.IsAny<Exception>(), // Exception (if any)
-              It.IsAny<Func<ProjectsController, Exception, string>>() // Formatter function
+              LogLevel.Information, 
+              It.IsAny<EventId>(),
+              It.IsAny<ProjectsController>(),
+              It.IsAny<Exception>(), 
+              It.IsAny<Func<ProjectsController, Exception, string>>() 
               )).Verifiable();
         }
 

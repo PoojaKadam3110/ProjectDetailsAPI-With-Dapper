@@ -1,6 +1,8 @@
+using Application.ErrorHandling;
 using Data;
 using Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,6 +10,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics;
+using System.Net;
 using System.Text;
 
 // for cors
@@ -35,8 +39,6 @@ builder.Services.AddSwaggerGen();
 //For environment
 Environment.SetEnvironmentVariable("ASPNETCORE_APIURL", builder.Configuration.GetSection("Urls").GetSection("APIURL").Value);
 var env = Environment.GetEnvironmentVariable("ASPNETCORE_APIURL");
-
-
 
 //For Autorization
 builder.Services.AddSwaggerGen(options =>

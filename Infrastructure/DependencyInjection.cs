@@ -11,6 +11,8 @@ using Serilog;
 using Domain_Data.Mappings;
 using System.Data;
 using System.Data.SqlClient;
+using Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure
 {

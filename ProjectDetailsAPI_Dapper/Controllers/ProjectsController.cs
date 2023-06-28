@@ -19,7 +19,7 @@ namespace ProjectDetailsAPI_Dapper.Controllers
     [Route("api/[controller]")]
     [ApiController]
     public class ProjectsController : ControllerBase
-    {       
+    {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<ProjectsController> _logger;
         private readonly IConfiguration _configuration;
@@ -34,30 +34,22 @@ namespace ProjectDetailsAPI_Dapper.Controllers
             _mapper = mapper;
             _projectRepo = projectsRepo;
         }
-      
+
         [HttpGet]
         public async Task<IActionResult> GetAll(string projectName = null, string orderByColumn = "Id", bool isDescending = false, int pageSize = 1000, int pageNumber = 1)
         {
-            try
-            {
-                var data = await _unitOfWork.Projects.GetAllAsync(projectName, orderByColumn, isDescending, pageSize, pageNumber);
-                var result = data.Where(x => !x.isDeleted);
+            var data = await _unitOfWork.Projects.GetAllAsync(projectName, orderByColumn, isDescending, pageSize, pageNumber);
+            var result = data.Where(x => !x.isDeleted);
 
-                if (result != null && result.Any())
-                {
-                    _logger.LogInformation("Getting all the projects");
-                    return Ok(result);
-                }
-                else
-                {
-                    _logger.LogWarning("Project name not found in the DB !!!");
-                    return NotFound("This Project Name is not present in the database, please enter another name!");
-                }
-            }
-            catch (Exception ex)
+            if (result != null && result.Any())
             {
-                _logger.LogError(ex, "An error occurred while retrieving projects.");
-                return StatusCode(500, "An error occurred while retrieving projects. Please try again later.");
+                _logger.LogInformation("Getting all the projects");
+                return Ok(result);
+            }
+            else
+            {
+                _logger.LogWarning("Project name not found in the DB !!!");
+                return NotFound("This Project Name is not present in the database, please enter another name!");
             }
         }
 
@@ -67,49 +59,34 @@ namespace ProjectDetailsAPI_Dapper.Controllers
         [ValidateModule]
         public async Task<IActionResult> Add(ProjectsDto product)
         {
-            try
+            if (string.IsNullOrWhiteSpace(product.ProjectName))
             {
-                if (string.IsNullOrWhiteSpace(product.ProjectName))
-                {
-                    return BadRequest("Project name is required.");
-                }
-                var entity = _mapper.Map<Projects>(product);
-                var data =  await _unitOfWork.Projects.AddAsync(entity);
+                return BadRequest("Project name is required.");
+            }
+            var entity = _mapper.Map<Projects>(product);
+            var data = await _unitOfWork.Projects.AddAsync(entity);
 
-                if(data == 1)
-                {
-                    var createdProductDto = _mapper.Map<ProjectsDto>(entity);
-                    var response = "Project Save successfully!!!";
-                    return CreatedAtAction("GetById", new { id = createdProductDto.Id }, response);
-                }
-                return BadRequest("please entered valid data!!!");
-            }
-            catch (Exception ex)
+            if (data == 1)
             {
-                return StatusCode(500, "An error occurred while creating the product.");
+                var createdProductDto = _mapper.Map<ProjectsDto>(entity);
+                var response = "Project Save successfully!!!";
+                return CreatedAtAction("GetById", new { id = createdProductDto.Id }, response);
             }
+            return BadRequest("please entered valid data!!!");
         }
 
         [HttpDelete("Delete")]
         [ValidateModule]
         public async Task<IActionResult> Delete(int id)
         {
-           try
+            var data = await _unitOfWork.Projects.DeleteAsync(id);
+            if (data == 0)
             {
-                var data = await _unitOfWork.Projects.DeleteAsync(id);
-                if (data == 0)
-                {
-                    _logger.LogError("Not able to delete this project id " + id + " from the db!!!");
-                    return NotFound("you are not able to Delete this project Id " + id + " May be already deleted OR please entered some data first and after that only you are able to delete this data!!!");
-                }
-                _logger.LogInformation("Project deleted successfully!!!");
-                return Ok("Deleted Successfully!!!");
+                _logger.LogError("Not able to delete this project id " + id + " from the db!!!");
+                return NotFound("you are not able to Delete this project Id " + id + " May be already deleted OR please entered some data first and after that only you are able to delete this data!!!");
             }
-            catch(Exception ex)
-            {
-                _logger.LogError(ex, $"An error occurred while deleting the project with ID {id}.");
-                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while deleting the project with ID {id}. Please try again later.");
-            }
+            _logger.LogInformation("Project deleted successfully!!!");
+            return Ok("Deleted Successfully!!!");
         }
 
 
@@ -117,52 +94,44 @@ namespace ProjectDetailsAPI_Dapper.Controllers
         [ValidateModule]
         public async Task<IActionResult> Update(ProjectsDto product)
         {
-            try
+            var entity = _mapper.Map<Projects>(product);
+            if (entity.isDeleted == true)
             {
-                var entity = _mapper.Map<Projects>(product);
-                if (entity.isDeleted == true)
-                {
-                    return NotFound("Id " + product.Id + " Not present in the database");
-                }
-                var result = _unitOfWork.Projects.UpdateAsync(entity);
-                if (result.Result != 1)
-                {
-                    _logger.LogWarning("Id " + product.Id + " is Not present in the database please first insert id then try to update that!!!");
-                    return NotFound("Id" + product.Id + " is Not present in the database please first insert id then try to update that!!!");
-                }
-                _logger.LogInformation("Id " + product.Id + " updated successfully!!!");
-                return Ok("Updated Successfully!!!");
+                return NotFound("Id " + product.Id + " Not present in the database");
             }
-            catch(Exception ex)
+            var result = _unitOfWork.Projects.UpdateAsync(entity);
+            if (result.Result != 1)
             {
-                _logger.LogError(ex, $"An error occurred while updating the project with ID {product.Id}.");
-                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while updating the project with ID {product.Id}. Please try again later.");
+                _logger.LogWarning("Id " + product.Id + " is Not present in the database please first insert id then try to update that!!!");
+                return NotFound("Id " + product.Id + " is Not present in the database please first insert id then try to update that!!!");
             }
+            _logger.LogInformation("Id " + product.Id + " updated successfully!!!");
+            return Ok("Updated Successfully!!!");
         }
 
-            [HttpGet("id")]
+        [HttpGet("id")]
         [ValidateModule]
         [Authorize(Roles ="Admin")]
         public async Task<IActionResult> GetById(int id)
         {
-            try
+            //throw new UnauthorizedAccessException();
+            //throw new NotImplementedException();
+            if (id < 0)
             {
-                var data = await _unitOfWork.Projects.GetByIdAsync(id);
-
-                if (data == null || data.isDeleted == true)
-                {
-                    _logger.LogWarning($"Project with ID {id} not found.");
-                    return NotFound($"Project with ID {id} not found. It may have been deleted or not inserted yet. Please try again.");
-                }
-
-                _logger.LogInformation("Your request is displayed on the screen, please check!!!");
-                return Ok(data);
+                throw new ArgumentException();
             }
-            catch (Exception ex)
+
+            var data = await _unitOfWork.Projects.GetByIdAsync(id);
+
+            if (data == null || data.isDeleted == true)
             {
-                _logger.LogError(ex, $"An error occurred while retrieving the project with ID {id}.");
-                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while retrieving the project with ID {id}. Please try again later.");
+                _logger.LogWarning($"Project with ID {id} not found.");
+                return NotFound($"Project with ID {id} not found. It may have been deleted or not inserted yet. Please try again.");
             }
+
+            _logger.LogInformation("Your request is displayed on the screen, please check!!!");
+            return Ok(data);
+            //throw new Exception("Some unknown exception occurred");           
         }
     }
 }

@@ -26,7 +26,7 @@ namespace Infrastructure
             services.AddLogging();
             services.AddAutoMapper(typeof(AutoMapperProfiles));
 
-            string connectionString = "Server=ZCONL-140\\SQL2016EXPADV;DataBase=TSProjectDetailsZohoDapper;User=sa;Password=zcon@123;Trusted_Connection=true; TrustServerCertificate=true; Integrated Security=true;";
+            string connectionString = "Server=10.235.3.8\\SQL2019STDMPNNEW;DataBase=TSProjectDetailsZoho;User=sa;Password=zcon@123;TrustServerCertificate=true;";
 
             services.AddScoped<IDbConnection>(sp => new SqlConnection(connectionString));
 

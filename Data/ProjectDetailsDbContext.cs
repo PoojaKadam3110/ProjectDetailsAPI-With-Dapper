@@ -10,7 +10,8 @@ namespace Data
 {
     public class ProjectDetailsDbContext : DbContext
     {
-        public ProjectDetailsDbContext(DbContextOptions<ProjectDetailsDbContext> options) : base(options)
+        public ProjectDetailsDbContext(DbContextOptions<ProjectDetailsDbContext> options) 
+            : base(options)
         {
 
         }

@@ -5,10 +5,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace Data.Migrations.ProjectDetailsAuthDb
+namespace dto_Migration_test.Migrations.ProjectDetailsAuthDb
 {
     /// <inheritdoc />
-    public partial class CreateforAuthorization : Migration
+    public partial class CreateAuthtableforProjectDetails : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

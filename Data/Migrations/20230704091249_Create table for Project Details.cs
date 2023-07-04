@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Data.Migrations
+namespace dto_Migration_test.Migrations
 {
     /// <inheritdoc />
-    public partial class Createtableintodb : Migration
+    public partial class CreatetableforProjectDetails : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

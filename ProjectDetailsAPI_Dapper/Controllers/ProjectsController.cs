@@ -132,5 +132,23 @@ namespace ProjectDetailsAPI_Dapper.Controllers
             _logger.LogInformation("Your request is displayed on the screen, please check!!!");
             return Ok(data);          
         }
+
+        [HttpGet("ProjectsCount")]
+        [Authorize(Roles = "Admin")]
+        public IActionResult GetRecordCountProjects()
+        {
+            int count = _unitOfWork.Projects.GetRecordCount();
+            return Ok("Number of active projects in the database is: " + count);
+        }
+
+        [HttpGet("DeletedProjectsCount")]
+        [Authorize(Roles = "Admin")]
+        public IActionResult GetDeletedRecordCountProjects()
+        {
+            int count = _unitOfWork.Projects.GetDeletedRecordCount();
+            return Ok("Number of Deleted projects is: " + count);
+        }
+
+
     }
 }

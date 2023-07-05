@@ -14,5 +14,7 @@ namespace Interfaces
         Task<int> AddAsync(T entity);
         Task<int> UpdateAsync(T entity);
         Task<int> DeleteAsync(int id);
+        int GetRecordCount();
+        int GetDeletedRecordCount();
     }
 }

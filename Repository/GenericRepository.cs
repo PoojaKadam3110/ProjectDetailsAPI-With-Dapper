@@ -15,6 +15,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static Dapper.SqlMapper;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Repository
 {
@@ -133,6 +134,26 @@ namespace Repository
             string query = $"UPDATE {tableName} SET {columnValues} WHERE Id = @Id";
 
             return await dbConnection1.ExecuteAsync(query, entity);
+        }
+
+
+        public int GetRecordCount()
+        {
+
+            string tableName = typeof(T).Name;
+            string query = $"SELECT COUNT(*) FROM {tableName} WHERE isDeleted = 'false'";
+            int recordCount = dbConnection1.QuerySingle<int>(query);
+
+            return recordCount;
+
+        }
+        public int GetDeletedRecordCount()
+        {
+            string tableName = typeof(T).Name;
+            string query = $"SELECT COUNT(*) FROM {tableName} WHERE isDeleted = 'true'";
+            int recordCount = dbConnection1.QuerySingle<int>(query);
+
+            return recordCount;
         }
     }
 }

@@ -130,8 +130,7 @@ namespace ProjectDetailsAPI_Dapper.Controllers
             }
 
             _logger.LogInformation("Your request is displayed on the screen, please check!!!");
-            return Ok(data);
-            //throw new Exception("Some unknown exception occurred");           
+            return Ok(data);          
         }
     }
 }

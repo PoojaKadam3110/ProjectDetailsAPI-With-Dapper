@@ -1,4 +1,3 @@
-
 using Application.Extensions;
 using Application.Middlewares;
 using Data;

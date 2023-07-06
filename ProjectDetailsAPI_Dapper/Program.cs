@@ -41,6 +41,13 @@ Environment.SetEnvironmentVariable("ASPNETCORE_APIURL", builder.Configuration.Ge
 var env = Environment.GetEnvironmentVariable("ASPNETCORE_APIURL");
 
 
+var configuration = new ConfigurationBuilder()
+    .SetBasePath(Directory.GetCurrentDirectory())   
+    .AddJsonFile("appsettings.json")
+    .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", optional: true)
+    .AddEnvironmentVariables()
+    .Build();
+builder.Services.AddSingleton(configuration);
 
 //For Autorization
 builder.Services.AddSwaggerGen(options =>
@@ -142,9 +149,37 @@ app.UseAuthorization();
 app.UseCors(MyAllowSpecificOrigins);
 
 app.MapControllers();
-
 app.Run();
 static void AddInfrastructure(IServiceCollection services)
 {
     DependencyInjection.AddInfrastructure(services);
 }
+
+
+CreateHostBuilder(args).Build().Run();
+//static IHostBuilder CreateHostBuilder(string[] args)
+//{
+//    Host.CreateDefaultBuilder(args)
+//        .ConfigureAppConfiguration((a, configuration) =>
+//        {
+//            configuration.AddJsonFile("appsettings.json");
+//            configuration.AddJsonFile($"appsettings.json.{}.json");
+//        })
+//}
+
+static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration((hostingContext, config) =>
+                {
+                    config.SetBasePath(hostingContext.HostingEnvironment.ContentRootPath);
+
+                    // Specify the environment-specific configuration file based on the current environment
+                    config.AddJsonFile($"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: true);
+
+                    // Exclude the original appsettings.json file from being loaded
+                    config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+                    // Add other configuration sources if needed
+                    // ...
+                });
+

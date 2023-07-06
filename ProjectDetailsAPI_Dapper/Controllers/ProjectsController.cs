@@ -13,6 +13,7 @@ using Repository;
 using System.Data.SqlClient;
 using static Dapper.SqlMapper;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace ProjectDetailsAPI_Dapper.Controllers
 {
@@ -72,6 +73,7 @@ namespace ProjectDetailsAPI_Dapper.Controllers
                 var response = "Project Save successfully!!!";
                 return CreatedAtAction("GetById", new { id = createdProductDto.Id }, response);
             }
+
             return BadRequest("please entered valid data!!!");
         }
 
@@ -148,7 +150,5 @@ namespace ProjectDetailsAPI_Dapper.Controllers
             int count = _unitOfWork.Projects.GetDeletedRecordCount();
             return Ok("Number of Deleted projects is: " + count);
         }
-
-
     }
 }

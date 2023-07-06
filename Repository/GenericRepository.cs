@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using Data;
 using Domain_Data.Models.Domain;
+using Domain_Data.Models.DTO;
 using Interfaces;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
@@ -30,8 +31,6 @@ namespace Repository
         {
             this.dbConnection1 = dbConnection1;
         }
-
-
         public async Task<int> AddAsync(T entity)
         {
             // Set additional fields manually
@@ -58,12 +57,11 @@ namespace Repository
             string columnNames = string.Join(", ", properties.Select(p => p.Name));
             string parameterNames = string.Join(", ", properties.Select(p => "@" + p.Name));
             string query = $"INSERT INTO {tableName} ({columnNames}) VALUES ({parameterNames})";
-
+           
 
             return await dbConnection1.ExecuteAsync(query, entity);
 
         }
-
 
         public async Task<int> DeleteAsync(int id)
         {
@@ -78,6 +76,7 @@ namespace Repository
             }
 
             string query = $"UPDATE {tableName} SET isActive = 0, isDeleted = 1 WHERE Id = @Id";
+
             return await dbConnection1.ExecuteAsync(query, parameters);
         }
         public async Task<IEnumerable<T>> GetAllAsync(string projectName, string orderByColumn, bool isDescending, int pageSize = 1000, int pageNumber = 1)

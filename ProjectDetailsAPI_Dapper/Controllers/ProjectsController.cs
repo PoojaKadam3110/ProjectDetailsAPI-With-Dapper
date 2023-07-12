@@ -3,17 +3,17 @@ using AutoMapper;
 using Azure;
 using Domain_Data.Models.Domain;
 using Domain_Data.Models.DTO;
-using Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using Microsoft.Extensions.Configuration;
-using Repository;
+using Application.Repository;
 using System.Data.SqlClient;
 using static Dapper.SqlMapper;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using Application.Interfaces;
 
 namespace ProjectDetailsAPI_Dapper.Controllers
 {

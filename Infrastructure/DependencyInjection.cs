@@ -1,6 +1,6 @@
-﻿using Interfaces;
+﻿using Application.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
-using Repository;
+using Application.Repository;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;

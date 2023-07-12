@@ -1,7 +1,7 @@
-﻿using AutoMapper;
+﻿using Application.Interfaces;
+using AutoMapper;
 using Domain_Data.Models.Domain;
 using Domain_Data.Models.DTO;
-using Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
